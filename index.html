@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Skillchek AI | Measure Skills. Discover Potential.</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: #f7f9fc;
+      color: #172033;
+      overflow-x: hidden;
+    }
+
+    /* =========================
+       NAVBAR
+    ========================== */
+
+    .navbar {
+      height: 74px;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid #e8ebf2;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 7%;
+
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 800;
+      color: #1d4ed8;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      color: #111827;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #475467;
+      font-size: 14px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #1d4ed8;
+    }
+
+    .nav-button {
+      text-decoration: none;
+      background: #1d4ed8;
+      color: white !important;
+
+      padding: 11px 18px;
+      border-radius: 9px;
+
+      font-size: 13px !important;
+    }
+
+    .nav-button:hover {
+      background: #1740b5;
+    }
+
+    /* =========================
+       HERO
+    ========================== */
+
+    .hero {
+      min-height: calc(100vh - 74px);
+
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 60px;
+
+      width: 86%;
+      max-width: 1200px;
+      margin: auto;
+
+      padding: 65px 0;
+    }
+
+    .hero-content {
+      max-width: 590px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      background: #eef4ff;
+      color: #1d4ed8;
+
+      border: 1px solid #dbe7ff;
+
+      padding: 8px 13px;
+      border-radius: 20px;
+
+      font-size: 12px;
+      font-weight: 800;
+
+      margin-bottom: 20px;
+    }
+
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #1d4ed8;
+    }
+
+    .hero h1 {
+      font-size: clamp(42px, 5vw, 67px);
+      line-height: 1.05;
+      letter-spacing: -2.5px;
+
+      margin-bottom: 22px;
+    }
+
+    .hero h1 span {
+      color: #1d4ed8;
+    }
+
+    .hero-description {
+      color: #667085;
+      font-size: 17px;
+      line-height: 1.7;
+
+      max-width: 530px;
+
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .primary-btn {
+      text-decoration: none;
+
+      background: #1d4ed8;
+      color: white;
+
+      padding: 14px 23px;
+      border-radius: 10px;
+
+      font-size: 14px;
+      font-weight: 800;
+
+      box-shadow: 0 8px 20px rgba(29, 78, 216, 0.18);
+
+      transition: 0.2s;
+    }
+
+    .primary-btn:hover {
+      background: #1740b5;
+      transform: translateY(-2px);
+    }
+
+    .secondary-btn {
+      text-decoration: none;
+
+      color: #344054;
+
+      padding: 14px 20px;
+
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+
+      font-size: 14px;
+      font-weight: 700;
+
+      background: white;
+    }
+
+    .secondary-btn:hover {
+      border-color: #98a2b3;
+    }
+
+    .trust-text {
+      margin-top: 25px;
+      color: #98a2b3;
+      font-size: 12px;
+    }
+
+    /* =========================
+       DASHBOARD PREVIEW
+    ========================== */
+
+    .hero-visual {
+      position: relative;
+    }
+
+    .dashboard {
+      background: white;
+
+      border: 1px solid #e4e8f0;
+      border-radius: 22px;
+
+      padding: 22px;
+
+      box-shadow:
+        0 25px 70px rgba(16, 24, 40, 0.10),
+        0 5px 20px rgba(16, 24, 40, 0.04);
+
+      transform: rotate(1deg);
+    }
+
+    .dashboard-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      padding-bottom: 18px;
+      border-bottom: 1px solid #eef0f4;
+    }
+
+    .dashboard-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .live-badge {
+      background: #ecfdf3;
+      color: #07883f;
+
+      padding: 6px 10px;
+      border-radius: 20px;
+
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .score-area {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      padding: 25px 0;
+    }
+
+    .score-ring {
+      width: 105px;
+      height: 105px;
+
+      border-radius: 50%;
+
+      background:
+        conic-gradient(#1d4ed8 0 82%, #e8eefb 82% 100%);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-inner {
+      width: 78px;
+      height: 78px;
+
+      background: white;
+      border-radius: 50%;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-inner strong {
+      font-size: 23px;
+    }
+
+    .score-inner span {
+      color: #98a2b3;
+      font-size: 9px;
+    }
+
+    .score-info h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .score-info p {
+      color: #667085;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .skill-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 35px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .skill-name {
+      font-size: 11px;
+      color: #475467;
+      font-weight: 700;
+    }
+
+    .progress {
+      height: 7px;
+      background: #edf1f7;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: #1d4ed8;
+      border-radius: 10px;
+    }
+
+    .skill-score {
+      font-size: 10px;
+      color: #667085;
+      text-align: right;
+    }
+
+    .dashboard-bottom {
+      margin-top: 22px;
+
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mini-box {
+      background: #f8fafc;
+      border-radius: 11px;
+      padding: 13px;
+    }
+
+    .mini-box span {
+      display: block;
+      color: #98a2b3;
+      font-size: 9px;
+      margin-bottom: 5px;
+    }
+
+    .mini-box strong {
+      font-size: 15px;
+    }
+
+    /* =========================
+       SECTION
+    ========================== */
+
+    .section {
+      width: 86%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 90px 0;
+    }
+
+    .section-heading {
+      text-align: center;
+      max-width: 650px;
+      margin: 0 auto 45px;
+    }
+
+    .section-heading h2 {
+      font-size: 34px;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+
+    .section-heading p {
+      color: #667085;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       FEATURES
+    ========================== */
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: white;
+
+      border: 1px solid #e7eaf0;
+      border-radius: 17px;
+
+      padding: 28px;
+
+      transition: 0.25s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(16, 24, 40, 0.07);
+    }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+
+      border-radius: 12px;
+      background: #eef4ff;
+      color: #1d4ed8;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 20px;
+      font-weight: 800;
+
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 17px;
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       HOW IT WORKS
+    ========================== */
+
+    .steps-section {
+      background: white;
+      border-top: 1px solid #edf0f5;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .step {
+      position: relative;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .step-number {
+      width: 45px;
+      height: 45px;
+
+      margin: 0 auto 17px;
+
+      border-radius: 50%;
+
+      background: #1d4ed8;
+      color: white;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .step h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* =========================
+       CTA
+    ========================== */
+
+    .cta {
+      background: #172033;
+      color: white;
+
+      border-radius: 22px;
+
+      padding: 55px 40px;
+
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .cta p {
+      color: #b7c0d0;
+      font-size: 14px;
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto 25px;
+    }
+
+    .cta .primary-btn {
+      display: inline-block;
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    footer {
+      background: white;
+      border-top: 1px solid #e8ebf2;
+
+      padding: 25px 7%;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      color: #98a2b3;
+      font-size: 12px;
+    }
+
+    .footer-logo {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1d4ed8;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 850px) {
+
+      .navbar {
+        padding: 0 5%;
+      }
+
+      .nav-links {
+        gap: 15px;
+      }
+
+      .nav-links a:not(.nav-button) {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        width: 90%;
+        padding: 50px 0;
+      }
+
+      .hero-content {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .hero-description {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-actions {
+        justify-content: center;
+      }
+
+      .trust-text {
+        text-align: center;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .steps {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .section {
+        width: 90%;
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .hero h1 {
+        font-size: 42px;
+      }
+
+      .hero-description {
+        font-size: 15px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .primary-btn,
+      .secondary-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .dashboard {
+        transform: none;
+      }
+
+      .score-area {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .section {
+        padding: 65px 0;
+      }
+
+      .section-heading h2 {
+        font-size: 28px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .cta {
+        padding: 40px 22px;
+      }
+
+      .cta h2 {
+        font-size: 26px;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       NAVBAR
+  ========================== -->
+
+  <nav class="navbar">
+
+    <div class="logo">
+      Skillchek<span>AI</span>
+    </div>
+
+    <div class="nav-links">
+
+      <a href="#features">
+        Features
+      </a>
+
+      <a href="#how-it-works">
+        How It Works
+      </a>
+
+      <a href="#about">
+        About
+      </a>
+
+      <a
+        href="candidate.html"
+        class="nav-button"
+      >
+        Start Assessment
+      </a>
+
+    </div>
+
+  </nav>
+
+
+  <!-- =========================
+       HERO
+  ========================== -->
+
+  <section class="hero">
+
+    <div class="hero-content">
+
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        AI-Powered Skill Assessment
+      </div>
+
+      <h1>
+        Measure Skills.
+        <br>
+        <span>Discover Potential.</span>
+      </h1>
+
+      <p class="hero-description">
+        Skillchek AI helps candidates understand their real
+        competency through personalized assessments powered
+        by artificial intelligence.
+      </p>
+
+      <div class="hero-actions">
+
+        <a
+          href="candidate.html"
+          class="primary-btn"
+        >
+          Start Assessment →
+        </a>
+
+        <a
+          href="#how-it-works"
+          class="secondary-btn"
+        >
+          How It Works
+        </a>
+
+      </div>
+
+      <div class="trust-text">
+        20 AI-generated questions • Skill-based assessment • Instant results
+      </div>
+
+    </div>
+
+
+    <!-- DASHBOARD PREVIEW -->
+
+    <div class="hero-visual">
+
+      <div class="dashboard">
+
+        <div class="dashboard-top">
+
+          <div class="dashboard-title">
+            Candidate Performance
+          </div>
+
+          <div class="live-badge">
+            AI ANALYZED
+          </div>
+
+        </div>
+
+
+        <div class="score-area">
+
+          <div class="score-ring">
+
+            <div class="score-inner">
+
+              <strong>
+                82%
+              </strong>
+
+              <span>
+                OVERALL
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="score-info">
+
+            <h3>
+              Strong Competency
+            </h3>
+
+            <p>
+              Performance based on your
+              selected skills and assessment.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="skill-list">
+
+          <div class="skill-row">
+
+            <div class="skill-name">
+              Programming
+            </div>
+
+            <div class="progress">
+              <span style="width: 88%;"></span>
+            </div>
+
+            <div class="skill-score">
+              88%
+            </div>
+
+          </div>
+
+
+          <div class="skill-row">
+
+            <div class="skill-name">
+              Problem Solving
+            </div>
+
+            <div class="progress">
+              <span style="width: 81%;"></span>
+            </div>
+
+            <div class="skill-score">
+              81%
+            </div>
+
+          </div>
+
+
+          <div class="skill-row">
+
+            <div class="skill-name">
+              Communication
+            </div>
+
+            <div class="progress">
+              <span style="width: 76%;"></span>
+            </div>
+
+            <div class="skill-score">
+              76%
+            </div>
+
+          </div>
+
+
+          <div class="skill-row">
+
+            <div class="skill-name">
+              Typing
+            </div>
+
+            <div class="progress">
+              <span style="width: 84%;"></span>
+            </div>
+
+            <div class="skill-score">
+              84%
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="dashboard-bottom">
+
+          <div class="mini-box">
+
+            <span>
+              QUESTIONS
+            </span>
+
+            <strong>
+              20
+            </strong>
+
+          </div>
+
+
+          <div class="mini-box">
+
+            <span>
+              STATUS
+            </span>
+
+            <strong>
+              Completed
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       FEATURES
+  ========================== -->
+
+  <section
+    class="section"
+    id="features"
+  >
+
+    <div class="section-heading">
+
+      <h2>
+        Built for Smarter Skill Assessment
+      </h2>
+
+      <p>
+        A simple and intelligent assessment experience
+        designed to understand what candidates can actually do.
+      </p>
+
+    </div>
+
+
+    <div class="features">
+
+      <div class="feature-card">
+
+        <div class="feature-icon">
+          AI
+        </div>
+
+        <h3>
+          AI-Generated Assessment
+        </h3>
+
+        <p>
+          Questions are dynamically generated based on
+          the candidate's selected course, role and skills.
+        </p>
+
+      </div>
+
+
+      <div class="feature-card">
+
+        <div class="feature-icon">
+          20
+        </div>
+
+        <h3>
+          Structured Evaluation
+        </h3>
+
+        <p>
+          Every assessment contains 20 competency-based
+          questions with multiple difficulty levels.
+        </p>
+
+      </div>
+
+
+      <div class="feature-card">
+
+        <div class="feature-icon">
+          ✓
+        </div>
+
+        <h3>
+          Instant Performance Report
+        </h3>
+
+        <p>
+          Candidates receive their score, performance
+          summary and assessment profile immediately.
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       HOW IT WORKS
+  ========================== -->
+
+  <section
+    class="steps-section"
+    id="how-it-works"
+  >
+
+    <div class="section">
+
+      <div class="section-heading">
+
+        <h2>
+          How Skillchek AI Works
+        </h2>
+
+        <p>
+          Complete your assessment in four simple steps.
+        </p>
+
+      </div>
+
+
+      <div class="steps">
+
+        <div class="step">
+
+          <div class="step-number">
+            01
+          </div>
+
+          <h3>
+            Create Profile
+          </h3>
+
+          <p>
+            Enter your education,
+            experience and target role.
+          </p>
+
+        </div>
+
+
+        <div class="step">
+
+          <div class="step-number">
+            02
+          </div>
+
+          <h3>
+            Select Skills
+          </h3>
+
+          <p>
+            Choose the skills relevant
+            to your career goal.
+          </p>
+
+        </div>
+
+
+        <div class="step">
+
+          <div class="step-number">
+            03
+          </div>
+
+          <h3>
+            Take Assessment
+          </h3>
+
+          <p>
+            Answer 20 AI-generated
+            competency questions.
+          </p>
+
+        </div>
+
+
+        <div class="step">
+
+          <div class="step-number">
+            04
+          </div>
+
+          <h3>
+            Get Your Report
+          </h3>
+
+          <p>
+            View your score and
+            personalized performance profile.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       ABOUT / CTA
+  ========================== -->
+
+  <section
+    class="section"
+    id="about"
+  >
+
+    <div class="cta">
+
+      <h2>
+        Ready to discover your potential?
+      </h2>
+
+      <p>
+        Start your AI-powered competency assessment
+        and get a clear picture of your current skills.
+      </p>
+
+      <a
+        href="candidate.html"
+        class="primary-btn"
+      >
+        Start Your Assessment →
+      </a>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+
+  <footer>
+
+    <div class="footer-logo">
+      Skillchek AI
+    </div>
+
+    <div>
+      AI-powered competency assessment platform
+    </div>
+
+    <div>
+      © 2026 Skillchek AI
+    </div>
+
+  </footer>
+
+</body>
+</html>

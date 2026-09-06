@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Assessment | Skillchek AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f5f7fb;
+  color:#172033;
+}
+
+body.exam-active{
+  user-select:none;
+}
+
+nav{
+  height:70px;
+  background:white;
+  border-bottom:1px solid #e8ebf2;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 6%;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  color:#3157d5;
+}
+
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.timer{
+  background:#fff4e5;
+  color:#b96d00;
+  padding:9px 15px;
+  border-radius:9px;
+  font-size:14px;
+  font-weight:700;
+}
+
+.camera-status{
+  background:#edf8f3;
+  color:#159570;
+  padding:9px 14px;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.container{
+  width:92%;
+  max-width:1000px;
+  margin:30px auto 80px;
+}
+
+.loading-card{
+  background:white;
+  border-radius:18px;
+  padding:55px 30px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(20,30,60,.07);
+}
+
+.spinner{
+  width:48px;
+  height:48px;
+  border:5px solid #e8ebf2;
+  border-top:5px solid #3157d5;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:0 auto 20px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+.loading-card h2{
+  margin-bottom:10px;
+}
+
+.loading-card p{
+  color:#667085;
+  font-size:14px;
+  line-height:1.5;
+}
+
+#assessmentArea{
+  display:none;
+}
+
+.top-info{
+  margin-bottom:25px;
+}
+
+.top-info h1{
+  font-size:30px;
+  margin-bottom:8px;
+}
+
+.candidate-info{
+  color:#667085;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.progress-wrapper{
+  margin-top:20px;
+}
+
+.progress-text{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  color:#667085;
+  margin-bottom:8px;
+}
+
+.progress{
+  height:7px;
+  background:#e5e8ef;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress-bar{
+  height:100%;
+  width:5%;
+  background:#3157d5;
+  transition:width .3s;
+}
+
+.question-card{
+  background:white;
+  border-radius:18px;
+  padding:32px;
+  box-shadow:0 10px 30px rgba(20,30,60,.07);
+  margin-top:25px;
+}
+
+.question-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.category{
+  background:#eef2ff;
+  color:#3157d5;
+  padding:7px 11px;
+  border-radius:7px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.difficulty{
+  color:#667085;
+  font-size:12px;
+  font-weight:700;
+}
+
+.question-number{
+  color:#3157d5;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.question-text{
+  font-size:21px;
+  line-height:1.5;
+  font-weight:700;
+  margin-bottom:25px;
+}
+
+.options{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.option{
+  border:1px solid #dce1eb;
+  border-radius:11px;
+  padding:16px;
+  cursor:pointer;
+  display:flex;
+  align-items:flex-start;
+  gap:13px;
+  transition:.2s;
+  background:white;
+}
+
+.option:hover{
+  border-color:#3157d5;
+  background:#f8f9ff;
+}
+
+.option.selected{
+  border-color:#3157d5;
+  background:#eef2ff;
+}
+
+.option.locked{
+  cursor:not-allowed;
+}
+
+.option-letter{
+  width:30px;
+  height:30px;
+  min-width:30px;
+  border:1px solid #cdd3df;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  font-weight:700;
+  color:#667085;
+}
+
+.option.selected .option-letter{
+  background:#3157d5;
+  border-color:#3157d5;
+  color:white;
+}
+
+.option-text{
+  font-size:14px;
+  line-height:1.5;
+  padding-top:5px;
+}
+
+.lock-message{
+  display:none;
+  margin-top:15px;
+  background:#f2f4f7;
+  color:#667085;
+  padding:11px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.navigation{
+  display:flex;
+  justify-content:space-between;
+  margin-top:25px;
+  gap:15px;
+}
+
+.nav-btn{
+  border:none;
+  border-radius:10px;
+  padding:13px 22px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.nav-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.previous{
+  background:#eef0f5;
+  color:#475467;
+}
+
+.next{
+  background:#3157d5;
+  color:white;
+}
+
+.error-box{
+  display:none;
+  background:#fff1f1;
+  border:1px solid #ffd0d0;
+  color:#c0392b;
+  padding:15px;
+  border-radius:10px;
+  margin-top:20px;
+  font-size:13px;
+  line-height:1.5;
+}
+
+#cameraBox{
+  display:none;
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  width:220px;
+  background:#101828;
+  border-radius:13px;
+  padding:8px;
+  z-index:500;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+
+#cameraVideo{
+  width:100%;
+  display:block;
+  border-radius:9px;
+  transform:scaleX(-1);
+}
+
+.camera-label{
+  color:white;
+  font-size:11px;
+  text-align:center;
+  padding-top:7px;
+}
+
+.popup-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.65);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+
+.popup{
+  width:100%;
+  max-width:540px;
+  background:white;
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 20px 50px rgba(0,0,0,.2);
+}
+
+.popup h2{
+  margin-bottom:12px;
+}
+
+.popup p{
+  color:#667085;
+  font-size:14px;
+  line-height:1.6;
+  margin-bottom:15px;
+}
+
+.rules{
+  background:#f8f9fc;
+  padding:17px;
+  border-radius:11px;
+  margin-bottom:20px;
+}
+
+.rules div{
+  font-size:13px;
+  margin-bottom:9px;
+  color:#475467;
+}
+
+.rules div:last-child{
+  margin-bottom:0;
+}
+
+.start-btn{
+  width:100%;
+  border:none;
+  background:#3157d5;
+  color:white;
+  padding:14px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+#violationPopup{
+  display:none;
+}
+
+.violation-popup h2{
+  color:#c0392b;
+}
+
+footer{
+  text-align:center;
+  color:#98a2b3;
+  font-size:12px;
+  padding:25px;
+}
+
+@media(max-width:700px){
+
+  nav{
+    padding:0 4%;
+  }
+
+  .nav-right{
+    gap:7px;
+  }
+
+  .timer,
+  .camera-status{
+    padding:7px 8px;
+    font-size:11px;
+  }
+
+  .container{
+    width:94%;
+  }
+
+  .top-info h1{
+    font-size:25px;
+  }
+
+  .question-card{
+    padding:22px 16px;
+  }
+
+  .question-text{
+    font-size:18px;
+  }
+
+  .navigation{
+    flex-direction:column;
+  }
+
+  .nav-btn{
+    width:100%;
+  }
+
+  #cameraBox{
+    width:150px;
+    right:10px;
+    bottom:10px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- START POPUP -->
+
+<div class="popup-overlay" id="startPopup">
+
+  <div class="popup">
+
+    <h2>AI Competency Assessment</h2>
+
+    <p>
+      Your personalized assessment is ready to begin.
+      Questions are generated according to your
+      course, skills, education, experience and target role.
+    </p>
+
+    <div class="rules">
+
+      <div>⏱️ You will have 15 minutes.</div>
+
+      <div>📝 There are exactly 20 questions.</div>
+
+      <div>🔒 Once you move forward, your answer is locked.</div>
+
+      <div>📷 Camera monitoring will be enabled.</div>
+
+      <div>🤖 AI-assisted object detection will be active.</div>
+
+      <div>🚫 Copy, paste and common shortcuts are disabled.</div>
+
+      <div>⚠️ Three monitoring violations will automatically submit the assessment.</div>
+
+    </div>
+
+    <button
+      class="start-btn"
+      onclick="startAssessment()"
+    >
+      Start Assessment
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- VIOLATION POPUP -->
+
+<div class="popup-overlay" id="violationPopup">
+
+  <div class="popup violation-popup">
+
+    <h2>Monitoring Warning</h2>
+
+    <p id="violationMessage">
+      A monitoring violation has been detected.
+    </p>
+
+    <button
+      class="start-btn"
+      onclick="closeViolationPopup()"
+    >
+      Continue Assessment
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- NAVBAR -->
+
+<nav>
+
+  <div class="logo">
+    Skillchek AI
+  </div>
+
+  <div class="nav-right">
+
+    <div
+      class="camera-status"
+      id="cameraStatus"
+    >
+      Camera: Waiting
+    </div>
+
+    <div
+      class="timer"
+      id="timer"
+    >
+      15:00
+    </div>
+
+  </div>
+
+</nav>
+
+
+<!-- MAIN -->
+
+<main class="container">
+
+  <div
+    class="loading-card"
+    id="loadingCard"
+  >
+
+    <div class="spinner"></div>
+
+    <h2>
+      Preparing Your Assessment
+    </h2>
+
+    <p>
+      Skillchek AI is generating questions based on your profile.
+    </p>
+
+  </div>
+
+
+  <div id="assessmentArea">
+
+    <div class="top-info">
+
+      <h1>
+        Competency Assessment
+      </h1>
+
+      <div
+        class="candidate-info"
+        id="candidateInfo"
+      >
+        Candidate
+      </div>
+
+      <div class="progress-wrapper">
+
+        <div class="progress-text">
+
+          <span id="progressText">
+            Question 1 of 20
+          </span>
+
+          <span id="answeredText">
+            0 answered
+          </span>
+
+        </div>
+
+        <div class="progress">
+
+          <div
+            class="progress-bar"
+            id="progressBar"
+          ></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="question-card"
+      id="questionCard"
+    >
+
+      <div class="question-meta">
+
+        <div
+          class="category"
+          id="category"
+        >
+          Skill
+        </div>
+
+        <div
+          class="difficulty"
+          id="difficulty"
+        >
+          Medium
+        </div>
+
+      </div>
+
+
+      <div
+        class="question-number"
+        id="questionNumber"
+      >
+        Question 1
+      </div>
+
+
+      <div
+        class="question-text"
+        id="questionText"
+      >
+        Loading question...
+      </div>
+
+
+      <div
+        class="options"
+        id="options"
+      ></div>
+
+
+      <div
+        class="lock-message"
+        id="lockMessage"
+      >
+        🔒 Answer locked. This answer cannot be changed.
+      </div>
+
+
+      <div class="navigation">
+
+        <button
+          class="nav-btn previous"
+          id="previousBtn"
+          onclick="previousQuestion()"
+        >
+          ← Previous
+        </button>
+
+        <button
+          class="nav-btn next"
+          id="nextBtn"
+          onclick="nextQuestion()"
+        >
+          Next →
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="error-box"
+      id="errorBox"
+    ></div>
+
+  </div>
+
+</main>
+
+
+<!-- CAMERA -->
+
+<div id="cameraBox">
+
+  <video
+    id="cameraVideo"
+    autoplay
+    muted
+    playsinline
+  ></video>
+
+  <div class="camera-label">
+    AI Monitoring Active
+  </div>
+
+</div>
+
+
+<footer>
+  © 2026 Skillchek AI. AI-powered competency assessment platform.
+</footer>
+
+
+<script>
+
+/* =========================================
+   VARIABLES
+========================================= */
+
+var questions = [];
+
+var currentQuestion = 0;
+
+var selectedAnswers = [];
+
+var lockedAnswers = [];
+
+var assessmentStarted = false;
+
+var assessmentFinished = false;
+
+var timeLeft = 15 * 60;
+
+var timerInterval = null;
+
+var violations = 0;
+
+var lastViolationTime = 0;
+
+var cameraStream = null;
+
+var detectionModel = null;
+
+var detectionRunning = false;
+
+
+/* =========================================
+   CANDIDATE DATA
+========================================= */
+
+var candidateName =
+  localStorage.getItem("candidateName") || "Candidate";
+
+var candidateEmail =
+  localStorage.getItem("candidateEmail") || "";
+
+var candidateEducation =
+  localStorage.getItem("candidateEducation") || "";
+
+var candidateCourse =
+  localStorage.getItem("candidateCourse") || "";
+
+var candidateExperience =
+  localStorage.getItem("candidateExperience") || "";
+
+var candidateRole =
+  localStorage.getItem("candidateRole") || "";
+
+var candidateSkills =
+  localStorage.getItem("candidateSkills") || "";
+
+
+/* =========================================
+   CANDIDATE DISPLAY
+========================================= */
+
+document.getElementById(
+  "candidateInfo"
+).textContent =
+  candidateName +
+  " • " +
+  candidateRole +
+  " • " +
+  candidateSkills;
+
+
+/* =========================================
+   LOAD QUESTIONS
+========================================= */
+
+async function loadQuestions(){
+
+  try{
+
+    var response = await fetch(
+      "http://localhost:5000/api/generate-assessment",
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+          name:candidateName,
+
+          email:candidateEmail,
+
+          education:candidateEducation,
+
+          course:candidateCourse,
+
+          experience:candidateExperience,
+
+          role:candidateRole,
+
+          skills:candidateSkills
+
+        })
+      }
+    );
+
+
+    var data = await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.message ||
+        "Unable to generate assessment."
+      );
+
+    }
+
+
+    if(
+      !data.questions ||
+      !Array.isArray(data.questions) ||
+      data.questions.length !== 20
+    ){
+
+      throw new Error(
+        "AI did not return exactly 20 questions."
+      );
+
+    }
+
+
+    questions = data.questions;
+
+
+    selectedAnswers =
+      new Array(questions.length).fill(null);
+
+    lockedAnswers =
+      new Array(questions.length).fill(false);
+
+
+    document.getElementById(
+      "loadingCard"
+    ).style.display = "none";
+
+
+    document.getElementById(
+      "assessmentArea"
+    ).style.display = "block";
+
+
+    showQuestion();
+
+
+  }catch(error){
+
+    console.error(
+      "Assessment generation error:",
+      error
+    );
+
+
+    document.getElementById(
+      "loadingCard"
+    ).innerHTML =
+
+      "<h2>Unable to Generate Assessment</h2>" +
+
+      "<p style='color:#c0392b;margin-top:10px;'>" +
+
+      escapeHtml(error.message) +
+
+      "</p>" +
+
+      "<p style='margin-top:15px;color:#667085;'>" +
+
+      "Make sure the Skillchek AI server is running and try again." +
+
+      "</p>" +
+
+      "<button " +
+
+      "onclick='location.reload()' " +
+
+      "style='margin-top:20px;padding:12px 20px;border:0;border-radius:9px;background:#3157d5;color:white;font-weight:700;cursor:pointer;'>" +
+
+      "Try Again" +
+
+      "</button>";
+
+  }
+
+}
+
+
+/* =========================================
+   START
+========================================= */
+
+async function startAssessment(){
+
+  document.getElementById(
+    "startPopup"
+  ).style.display = "none";
+
+
+  assessmentStarted = true;
+
+  document.body.classList.add(
+    "exam-active"
+  );
+
+
+  try{
+
+    if(
+      document.documentElement.requestFullscreen
+    ){
+
+      await document.documentElement.requestFullscreen();
+
+    }
+
+  }catch(error){
+
+    console.log(
+      "Fullscreen request blocked."
+    );
+
+  }
+
+
+  startTimer();
+
+  startCamera();
+
+  startObjectDetection();
+
+}
+
+
+/* =========================================
+   TIMER
+========================================= */
+
+function startTimer(){
+
+  timerInterval =
+    setInterval(function(){
+
+      if(
+        assessmentFinished ||
+        !assessmentStarted
+      ){
+
+        return;
+
+      }
+
+
+      timeLeft--;
+
+      updateTimer();
+
+
+      if(timeLeft <= 0){
+
+        clearInterval(timerInterval);
+
+        submitAssessment(
+          "Time expired"
+        );
+
+      }
+
+    },1000);
+
+}
+
+
+function updateTimer(){
+
+  var minutes =
+    Math.floor(timeLeft / 60);
+
+  var seconds =
+    timeLeft % 60;
+
+
+  var minuteText =
+    minutes < 10
+      ? "0" + minutes
+      : minutes;
+
+  var secondText =
+    seconds < 10
+      ? "0" + seconds
+      : seconds;
+
+
+  document.getElementById(
+    "timer"
+  ).textContent =
+    minuteText +
+    ":" +
+    secondText;
+
+
+  if(timeLeft <= 60){
+
+    document.getElementById(
+      "timer"
+    ).style.background =
+      "#fff1f1";
+
+    document.getElementById(
+      "timer"
+    ).style.color =
+      "#c0392b";
+
+  }
+
+}
+
+
+/* =========================================
+   SHOW QUESTION
+========================================= */
+
+function showQuestion(){
+
+  if(!questions.length){
+
+    return;
+
+  }
+
+
+  var q =
+    questions[currentQuestion];
+
+
+  document.getElementById(
+    "questionNumber"
+  ).textContent =
+    "Question " +
+    (currentQuestion + 1);
+
+
+  document.getElementById(
+    "progressText"
+  ).textContent =
+    "Question " +
+    (currentQuestion + 1) +
+    " of " +
+    questions.length;
+
+
+  document.getElementById(
+    "candidateInfo"
+  ).textContent =
+    candidateName +
+    " • " +
+    candidateRole +
+    " • " +
+    candidateSkills;
+
+
+  document.getElementById(
+    "questionText"
+  ).textContent =
+    q.question;
+
+
+  document.getElementById(
+    "category"
+  ).textContent =
+    q.category || "General";
+
+
+  document.getElementById(
+    "difficulty"
+  ).textContent =
+    q.difficulty || "Medium";
+
+
+  var progress =
+    ((currentQuestion + 1) /
+      questions.length) * 100;
+
+
+  document.getElementById(
+    "progressBar"
+  ).style.width =
+    progress + "%";
+
+
+  renderOptions();
+
+  updateAnsweredText();
+
+
+  var previousBtn =
+    document.getElementById(
+      "previousBtn"
+    );
+
+
+  previousBtn.disabled =
+    currentQuestion === 0;
+
+
+  if(
+    currentQuestion ===
+    questions.length - 1
+  ){
+
+    document.getElementById(
+      "nextBtn"
+    ).textContent =
+      "Submit Assessment ✓";
+
+  }else{
+
+    document.getElementById(
+      "nextBtn"
+    ).textContent =
+      "Next →";
+
+  }
+
+}
+
+
+/* =========================================
+   RENDER OPTIONS
+========================================= */
+
+function renderOptions(){
+
+  var optionsContainer =
+    document.getElementById(
+      "options"
+    );
+
+
+  optionsContainer.innerHTML = "";
+
+
+  var q =
+    questions[currentQuestion];
+
+
+  var letters = [
+    "A",
+    "B",
+    "C",
+    "D"
+  ];
+
+
+  for(
+    var i = 0;
+    i < q.options.length;
+    i++
+  ){
+
+    var option =
+      document.createElement("div");
+
+
+    option.className =
+      "option";
+
+
+    if(
+      selectedAnswers[currentQuestion] === i
+    ){
+
+      option.classList.add(
+        "selected"
+      );
+
+    }
+
+
+    if(
+      lockedAnswers[currentQuestion]
+    ){
+
+      option.classList.add(
+        "locked"
+      );
+
+    }
+
+
+    option.setAttribute(
+      "data-index",
+      i
+    );
+
+
+    option.innerHTML =
+
+      "<div class='option-letter'>" +
+
+      letters[i] +
+
+      "</div>" +
+
+      "<div class='option-text'>" +
+
+      escapeHtml(
+        q.options[i]
+      ) +
+
+      "</div>";
+
+
+    option.onclick = function(){
+
+      var index =
+        Number(
+          this.getAttribute(
+            "data-index"
+          )
+        );
+
+
+      selectOption(index);
+
+    };
+
+
+    optionsContainer.appendChild(
+      option
+    );
+
+  }
+
+
+  var lockMessage =
+    document.getElementById(
+      "lockMessage"
+    );
+
+
+  if(
+    lockedAnswers[currentQuestion]
+  ){
+
+    lockMessage.style.display =
+      "block";
+
+  }else{
+
+    lockMessage.style.display =
+      "none";
+
+  }
+
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHtml(text){
+
+  var div =
+    document.createElement("div");
+
+  div.textContent =
+    text == null ? "" : String(text);
+
+  return div.innerHTML;
+
+}
+
+
+/* =========================================
+   SELECT OPTION
+========================================= */
+
+function selectOption(index){
+
+  if(
+    lockedAnswers[currentQuestion]
+  ){
+
+    return;
+
+  }
+
+
+  selectedAnswers[currentQuestion] =
+    index;
+
+
+  renderOptions();
+
+  updateAnsweredText();
+
+}
+
+
+/* =========================================
+   NEXT
+========================================= */
+
+function nextQuestion(){
+
+  if(!assessmentStarted){
+
+    return;
+
+  }
+
+
+  lockedAnswers[currentQuestion] =
+    true;
+
+
+  if(
+    currentQuestion ===
+    questions.length - 1
+  ){
+
+    submitAssessment(
+      "Assessment submitted"
+    );
+
+    return;
+
+  }
+
+
+  currentQuestion++;
+
+  showQuestion();
+
+}
+
+
+/* =========================================
+   PREVIOUS
+========================================= */
+
+function previousQuestion(){
+
+  if(
+    currentQuestion === 0
+  ){
+
+    return;
+
+  }
+
+
+  currentQuestion--;
+
+  showQuestion();
+
+}
+
+
+/* =========================================
+   ANSWER COUNT
+========================================= */
+
+function updateAnsweredText(){
+
+  var answered = 0;
+
+
+  for(
+    var i = 0;
+    i < selectedAnswers.length;
+    i++
+  ){
+
+    if(
+      selectedAnswers[i] !== null
+    ){
+
+      answered++;
+
+    }
+
+  }
+
+
+  document.getElementById(
+    "answeredText"
+  ).textContent =
+    answered +
+    " answered";
+
+}
+
+
+/* =========================================
+   CAMERA
+========================================= */
+
+async function startCamera(){
+
+  var video =
+    document.getElementById(
+      "cameraVideo"
+    );
+
+
+  var cameraBox =
+    document.getElementById(
+      "cameraBox"
+    );
+
+
+  var cameraStatus =
+    document.getElementById(
+      "cameraStatus"
+    );
+
+
+  try{
+
+    cameraStream =
+      await navigator.mediaDevices.getUserMedia(
+        {
+          video:{
+            facingMode:"user"
+          },
+          audio:false
+        }
+      );
+
+
+    video.srcObject =
+      cameraStream;
+
+
+    cameraBox.style.display =
+      "block";
+
+
+    cameraStatus.textContent =
+      "Camera: Active";
+
+
+  }catch(error){
+
+    console.error(
+      "Camera error:",
+      error
+    );
+
+
+    cameraStatus.textContent =
+      "Camera: Blocked";
+
+
+    cameraStatus.style.background =
+      "#fff1f1";
+
+    cameraStatus.style.color =
+      "#c0392b";
+
+
+    registerViolation(
+      "Camera permission was not granted."
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   AI OBJECT DETECTION
+========================================= */
+
+async function startObjectDetection(){
+
+  try{
+
+    if(
+      typeof cocoSsd ===
+      "undefined"
+    ){
+
+      console.log(
+        "COCO-SSD library not available."
+      );
+
+      return;
+
+    }
+
+
+    detectionModel =
+      await cocoSsd.load();
+
+
+    detectionRunning = true;
+
+
+    detectObjects();
+
+
+  }catch(error){
+
+    console.error(
+      "AI model error:",
+      error
+    );
+
+  }
+
+}
+
+
+async function detectObjects(){
+
+  if(
+    !detectionRunning ||
+    assessmentFinished
+  ){
+
+    return;
+
+  }
+
+
+  var video =
+    document.getElementById(
+      "cameraVideo"
+    );
+
+
+  if(
+    video.readyState >= 2 &&
+    detectionModel
+  ){
+
+    try{
+
+      var predictions =
+        await detectionModel.detect(
+          video
+        );
+
+
+      for(
+        var i = 0;
+        i < predictions.length;
+        i++
+      ){
+
+        var prediction =
+          predictions[i];
+
+
+        /*
+          Phone detection is made faster
+          and more sensitive.
+        */
+
+        var suspiciousObjects = [
+          "cell phone",
+          "laptop",
+          "keyboard",
+          "mouse"
+        ];
+
+
+        if(
+          suspiciousObjects.indexOf(
+            prediction.class
+          ) !== -1 &&
+          prediction.score >= 0.45
+        ){
+
+          registerViolation(
+            "AI detected: " +
+            prediction.class
+          );
+
+
+          break;
+
+        }
+
+      }
+
+    }catch(error){
+
+      console.log(
+        "Object detection error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /*
+    Detection interval changed from
+    2500ms to 700ms for faster detection.
+  */
+
+  setTimeout(
+    detectObjects,
+    700
+  );
+
+}
+
+
+/* =========================================
+   VIOLATION
+========================================= */
+
+function registerViolation(reason){
+
+  if(
+    !assessmentStarted ||
+    assessmentFinished
+  ){
+
+    return;
+
+  }
+
+
+  var now =
+    Date.now();
+
+
+  if(
+    now - lastViolationTime <
+    10000
+  ){
+
+    return;
+
+  }
+
+
+  lastViolationTime =
+    now;
+
+
+  violations++;
+
+
+  localStorage.setItem(
+    "assessmentViolations",
+    violations
+  );
+
+
+  if(violations >= 3){
+
+    submitAssessment(
+      "Assessment automatically submitted after 3 monitoring violations."
+    );
+
+    return;
+
+  }
+
+
+  document.getElementById(
+    "violationMessage"
+  ).textContent =
+    reason +
+    " Monitoring violation " +
+    violations +
+    " of 3.";
+
+
+  document.getElementById(
+    "violationPopup"
+  ).style.display =
+    "flex";
+
+}
+
+
+function closeViolationPopup(){
+
+  document.getElementById(
+    "violationPopup"
+  ).style.display =
+    "none";
+
+}
+
+
+/* =========================================
+   TAB CHANGE
+========================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  function(){
+
+    if(
+      document.hidden &&
+      assessmentStarted &&
+      !assessmentFinished
+    ){
+
+      registerViolation(
+        "You switched away from the assessment window."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   FULLSCREEN
+========================================= */
+
+document.addEventListener(
+  "fullscreenchange",
+  function(){
+
+    if(
+      assessmentStarted &&
+      !document.fullscreenElement &&
+      !assessmentFinished
+    ){
+
+      registerViolation(
+        "Fullscreen mode was exited."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   COPY
+========================================= */
+
+document.addEventListener(
+  "copy",
+  function(event){
+
+    if(assessmentStarted){
+
+      event.preventDefault();
+
+      registerViolation(
+        "Copy action detected."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   PASTE
+========================================= */
+
+document.addEventListener(
+  "paste",
+  function(event){
+
+    if(assessmentStarted){
+
+      event.preventDefault();
+
+      registerViolation(
+        "Paste action detected."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   CUT
+========================================= */
+
+document.addEventListener(
+  "cut",
+  function(event){
+
+    if(assessmentStarted){
+
+      event.preventDefault();
+
+      registerViolation(
+        "Cut action detected."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   RIGHT CLICK
+========================================= */
+
+document.addEventListener(
+  "contextmenu",
+  function(event){
+
+    if(assessmentStarted){
+
+      event.preventDefault();
+
+      registerViolation(
+        "Right-click detected."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   KEYBOARD SHORTCUTS
+========================================= */
+
+document.addEventListener(
+  "keydown",
+  function(event){
+
+    if(!assessmentStarted){
+
+      return;
+
+    }
+
+
+    var key =
+      event.key.toLowerCase();
+
+
+    if(
+      event.key === "F12" ||
+
+      (
+        event.ctrlKey &&
+        event.shiftKey &&
+        (
+          key === "i" ||
+          key === "j" ||
+          key === "c"
+        )
+      ) ||
+
+      (
+        event.ctrlKey &&
+        (
+          key === "u" ||
+          key === "s" ||
+          key === "c" ||
+          key === "v" ||
+          key === "x"
+        )
+      )
+    ){
+
+      event.preventDefault();
+
+
+      registerViolation(
+        "Restricted keyboard shortcut detected."
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   BEFORE UNLOAD
+========================================= */
+
+window.addEventListener(
+  "beforeunload",
+  function(event){
+
+    if(
+      assessmentStarted &&
+      !assessmentFinished
+    ){
+
+      event.preventDefault();
+
+      event.returnValue = "";
+
+    }
+
+  }
+);
+
+
+/* =========================================
+   SUBMIT
+========================================= */
+
+function submitAssessment(reason){
+
+  if(assessmentFinished){
+
+    return;
+
+  }
+
+
+  assessmentFinished = true;
+
+
+  clearInterval(
+    timerInterval
+  );
+
+
+  detectionRunning = false;
+
+
+  if(cameraStream){
+
+    var tracks =
+      cameraStream.getTracks();
+
+
+    for(
+      var i = 0;
+      i < tracks.length;
+      i++
+    ){
+
+      tracks[i].stop();
+
+    }
+
+  }
+
+
+  var correct = 0;
+
+  var incorrect = 0;
+
+  var unanswered = 0;
+
+
+  for(
+    var q = 0;
+    q < questions.length;
+    q++
+  ){
+
+    if(
+      selectedAnswers[q] === null
+    ){
+
+      unanswered++;
+
+    }else if(
+      selectedAnswers[q] ===
+      questions[q].answer
+    ){
+
+      correct++;
+
+    }else{
+
+      incorrect++;
+
+    }
+
+  }
+
+
+  var total =
+    questions.length;
+
+
+  var answered =
+    total - unanswered;
+
+
+  var score =
+    Math.round(
+      (correct / total) * 100
+    );
+
+
+  localStorage.setItem(
+    "assessmentScore",
+    score
+  );
+
+
+  localStorage.setItem(
+    "correctAnswers",
+    correct
+  );
+
+
+  localStorage.setItem(
+    "incorrectAnswers",
+    incorrect
+  );
+
+
+  localStorage.setItem(
+    "unansweredQuestions",
+    unanswered
+  );
+
+
+  localStorage.setItem(
+    "answeredQuestions",
+    answered
+  );
+
+
+  localStorage.setItem(
+    "totalQuestions",
+    total
+  );
+
+
+  localStorage.setItem(
+    "assessmentViolations",
+    violations
+  );
+
+
+  localStorage.setItem(
+    "assessmentQuestions",
+    JSON.stringify(questions)
+  );
+
+
+  localStorage.setItem(
+    "candidateSkills",
+    candidateSkills
+  );
+
+
+  console.log(
+    "Assessment finished:",
+    reason
+  );
+
+
+  setTimeout(
+    function(){
+
+      window.location.href =
+        "score.html";
+
+    },
+    300
+  );
+
+}
+
+
+/* =========================================
+   INITIALIZE
+========================================= */
+
+localStorage.setItem(
+  "assessmentViolations",
+  "0"
+);
+
+
+loadQuestions();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Candidate Details | Skillchek AI</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f5f7fb;
+      color: #172033;
+    }
+
+    nav {
+      height: 72px;
+      background: white;
+      border-bottom: 1px solid #e8ebf2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 7%;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 700;
+      color: #3157d5;
+    }
+
+    .nav-text {
+      font-size: 14px;
+      color: #667085;
+      font-weight: 600;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 760px;
+      margin: 45px auto;
+    }
+
+    .step {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .step-number {
+      color: #3157d5;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 6px;
+      background: #e8ebf2;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-bar {
+      width: 25%;
+      height: 100%;
+      background: #3157d5;
+    }
+
+    .card {
+      background: white;
+      padding: 35px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(20, 30, 60, 0.07);
+    }
+
+    .card h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      color: #667085;
+      font-size: 14px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 21px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 48px;
+      border: 1px solid #d9dee9;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 14px;
+      color: #172033;
+      background: white;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #3157d5;
+      box-shadow: 0 0 0 3px rgba(49, 87, 213, 0.08);
+    }
+
+    .skills-input {
+      height: 52px;
+    }
+
+    .hint {
+      margin-top: 7px;
+      color: #98a2b3;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .error {
+      display: none;
+      background: #fff1f1;
+      border: 1px solid #ffd0d0;
+      color: #c0392b;
+      padding: 12px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      gap: 15px;
+    }
+
+    .back-btn {
+      text-decoration: none;
+      color: #667085;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 13px 18px;
+    }
+
+    .continue-btn {
+      border: none;
+      background: #3157d5;
+      color: white;
+      padding: 14px 25px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .continue-btn:hover {
+      background: #2445b5;
+    }
+
+    footer {
+      text-align: center;
+      color: #98a2b3;
+      font-size: 13px;
+      padding: 25px;
+    }
+
+    @media (max-width: 600px) {
+
+      nav {
+        padding: 0 5%;
+      }
+
+      .nav-text {
+        font-size: 12px;
+      }
+
+      .container {
+        width: 92%;
+        margin: 30px auto;
+      }
+
+      .card {
+        padding: 25px 18px;
+      }
+
+      .card h1 {
+        font-size: 24px;
+      }
+
+      .buttons {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+
+      .back-btn {
+        text-align: center;
+      }
+
+      .continue-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div class="logo">Skillchek AI</div>
+    <div class="nav-text">Candidate Assessment</div>
+  </nav>
+
+
+  <main class="container">
+
+    <div class="step">
+
+      <div class="step-number">
+        STEP 1 OF 4
+      </div>
+
+      <div class="progress">
+        <div class="progress-bar"></div>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h1>Candidate Details</h1>
+
+      <p class="card-subtitle">
+        Tell us about yourself so Skillchek AI can create a
+        personalized competency assessment for you.
+      </p>
+
+
+      <div class="error" id="errorMessage">
+        Please complete all required fields before continuing.
+      </div>
+
+
+      <!-- Full Name -->
+      <div class="form-group">
+
+        <label for="name">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="name"
+          placeholder="Enter your full name"
+        >
+
+      </div>
+
+
+      <!-- Email -->
+      <div class="form-group">
+
+        <label for="email">
+          Email Address
+        </label>
+
+        <input
+          type="email"
+          id="email"
+          placeholder="Enter your email address"
+        >
+
+      </div>
+
+
+      <!-- Education Level -->
+      <div class="form-group">
+
+        <label for="education">
+          Education Level
+        </label>
+
+        <select id="education">
+
+          <option value="">
+            Select education level
+          </option>
+
+          <option value="10th">
+            10th
+          </option>
+
+          <option value="12th">
+            12th
+          </option>
+
+          <option value="Diploma">
+            Diploma
+          </option>
+
+          <option value="Undergraduate">
+            Undergraduate
+          </option>
+
+          <option value="Postgraduate">
+            Postgraduate
+          </option>
+
+          <option value="Other">
+            Other
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Current Course -->
+      <div class="form-group">
+
+        <label for="course">
+          Current Course
+        </label>
+
+        <input
+          type="text"
+          id="course"
+          placeholder="Example: BCA, B.Tech, MCA, MBA, B.Com"
+        >
+
+        <div class="hint">
+          Enter your current course or specialization.
+        </div>
+
+      </div>
+
+
+      <!-- Experience Level -->
+      <div class="form-group">
+
+        <label for="experience">
+          Experience Level
+        </label>
+
+        <select id="experience">
+
+          <option value="">
+            Select experience level
+          </option>
+
+          <option value="Fresher">
+            Fresher
+          </option>
+
+          <option value="0-1 Years">
+            0-1 Years
+          </option>
+
+          <option value="1-3 Years">
+            1-3 Years
+          </option>
+
+          <option value="3-5 Years">
+            3-5 Years
+          </option>
+
+          <option value="5+ Years">
+            5+ Years
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Target Role -->
+      <div class="form-group">
+
+        <label for="role">
+          Target Role
+        </label>
+
+        <select id="role">
+
+          <option value="">
+            Select target role
+          </option>
+
+          <option value="Software Developer">
+            Software Developer
+          </option>
+
+          <option value="Web Developer">
+            Web Developer
+          </option>
+
+          <option value="Data Analyst">
+            Data Analyst
+          </option>
+
+          <option value="UI/UX Designer">
+            UI/UX Designer
+          </option>
+
+          <option value="Project Manager">
+            Project Manager
+          </option>
+
+          <option value="Business Analyst">
+            Business Analyst
+          </option>
+
+          <option value="Other">
+            Other
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Skills -->
+      <div class="form-group">
+
+        <label for="skills">
+          Skills
+        </label>
+
+        <input
+          type="text"
+          id="skills"
+          class="skills-input"
+          placeholder="Example: Python, Java, SQL, React, Communication"
+        >
+
+        <div class="hint">
+          Enter all the skills you want to be assessed on, separated by commas.
+        </div>
+
+      </div>
+
+
+      <div class="buttons">
+
+        <a href="index.html" class="back-btn">
+          ← Back
+        </a>
+
+        <button
+          class="continue-btn"
+          onclick="continueToAssessment()"
+        >
+          Continue to Assessment →
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <footer>
+    © 2026 Skillchek AI. AI-powered competency assessment platform.
+  </footer>
+
+
+  <script>
+
+    function continueToAssessment() {
+
+      var name =
+        document.getElementById("name").value.trim();
+
+      var email =
+        document.getElementById("email").value.trim();
+
+      var education =
+        document.getElementById("education").value;
+
+      var course =
+        document.getElementById("course").value.trim();
+
+      var experience =
+        document.getElementById("experience").value;
+
+      var role =
+        document.getElementById("role").value;
+
+      var skills =
+        document.getElementById("skills").value.trim();
+
+
+      var errorMessage =
+        document.getElementById("errorMessage");
+
+
+      if (
+        name === "" ||
+        email === "" ||
+        education === "" ||
+        course === "" ||
+        experience === "" ||
+        role === "" ||
+        skills === ""
+      ) {
+
+        errorMessage.style.display = "block";
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+        return;
+      }
+
+
+      errorMessage.style.display = "none";
+
+
+      localStorage.setItem(
+        "candidateName",
+        name
+      );
+
+      localStorage.setItem(
+        "candidateEmail",
+        email
+      );
+
+      localStorage.setItem(
+        "candidateEducation",
+        education
+      );
+
+      localStorage.setItem(
+        "candidateCourse",
+        course
+      );
+
+      localStorage.setItem(
+        "candidateExperience",
+        experience
+      );
+
+      localStorage.setItem(
+        "candidateRole",
+        role
+      );
+
+      localStorage.setItem(
+        "candidateSkills",
+        skills
+      );
+
+
+      window.location.href =
+        "assessment.html";
+
+    }
+
+  </script>
+
+</body>
+</html>

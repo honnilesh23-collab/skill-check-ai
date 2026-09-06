@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment Results | Skillchek AI</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #f5f7fb;
+      color: #172033;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      height: 72px;
+      background: white;
+      border-bottom: 1px solid #e8ebf2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 7%;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 800;
+      color: #1d4ed8;
+    }
+
+    .logo span {
+      color: #111827;
+    }
+
+    .nav-right {
+      color: #667085;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* MAIN */
+    .container {
+      width: 90%;
+      max-width: 1050px;
+      margin: 45px auto;
+    }
+
+    .top-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .top-section h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .top-section p {
+      color: #667085;
+      font-size: 15px;
+    }
+
+    .completed {
+      background: #ecfdf3;
+      color: #07883f;
+      padding: 9px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* CANDIDATE */
+    .candidate-card {
+      background: white;
+      border: 1px solid #e7eaf0;
+      border-radius: 16px;
+      padding: 22px 25px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .candidate-name {
+      font-size: 19px;
+      font-weight: 750;
+      margin-bottom: 5px;
+    }
+
+    .candidate-role {
+      color: #667085;
+      font-size: 14px;
+    }
+
+    .result-date {
+      color: #98a2b3;
+      font-size: 13px;
+    }
+
+    /* SCORE CARD */
+    .score-card {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+      color: white;
+      border-radius: 20px;
+      padding: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      box-shadow: 0 15px 35px rgba(29, 78, 216, 0.18);
+    }
+
+    .score-left h2 {
+      font-size: 17px;
+      font-weight: 500;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .score-number {
+      font-size: 62px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .score-number span {
+      font-size: 27px;
+      opacity: 0.8;
+    }
+
+    .performance {
+      margin-top: 12px;
+      font-size: 15px;
+      opacity: 0.92;
+    }
+
+    .score-circle {
+      width: 135px;
+      height: 135px;
+      border-radius: 50%;
+      border: 10px solid rgba(255,255,255,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid #e7eaf0;
+      border-radius: 16px;
+      padding: 25px;
+    }
+
+    .stat-title {
+      color: #667085;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .stat-number {
+      font-size: 30px;
+      font-weight: 800;
+    }
+
+    .correct {
+      color: #07883f;
+    }
+
+    .incorrect {
+      color: #dc2626;
+    }
+
+    .unanswered {
+      color: #d97706;
+    }
+
+    /* MONITORING */
+    .monitor-card {
+      background: white;
+      border: 1px solid #e7eaf0;
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    .monitor-title {
+      font-size: 17px;
+      font-weight: 750;
+      margin-bottom: 18px;
+    }
+
+    .monitor-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f2f5;
+      font-size: 14px;
+    }
+
+    .monitor-row:last-child {
+      border-bottom: none;
+    }
+
+    .monitor-label {
+      color: #667085;
+    }
+
+    .safe {
+      color: #07883f;
+      font-weight: 700;
+    }
+
+    .warning {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    /* BUTTON */
+    .action-area {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 28px;
+    }
+
+    .profile-btn {
+      border: none;
+      background: #1d4ed8;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .profile-btn:hover {
+      background: #1740b5;
+      transform: translateY(-1px);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 700px) {
+      .navbar {
+        padding: 0 5%;
+      }
+
+      .container {
+        width: 92%;
+        margin: 30px auto;
+      }
+
+      .top-section {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .top-section h1 {
+        font-size: 27px;
+      }
+
+      .candidate-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .score-card {
+        padding: 28px;
+      }
+
+      .score-number {
+        font-size: 50px;
+      }
+
+      .score-circle {
+        width: 105px;
+        height: 105px;
+        font-size: 21px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .action-area {
+        justify-content: stretch;
+      }
+
+      .profile-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">
+      Skillchek<span>AI</span>
+    </div>
+
+    <div class="nav-right">
+      Assessment Completed
+    </div>
+  </nav>
+
+
+  <main class="container">
+
+    <!-- HEADER -->
+    <div class="top-section">
+      <div>
+        <h1>Assessment Results</h1>
+        <p>Your competency assessment has been successfully completed.</p>
+      </div>
+
+      <div class="completed">
+        ✓ Completed
+      </div>
+    </div>
+
+
+    <!-- CANDIDATE INFO -->
+    <div class="candidate-card">
+
+      <div>
+        <div class="candidate-name" id="candidateName">
+          Candidate
+        </div>
+
+        <div class="candidate-role" id="candidateRole">
+          Target Role
+        </div>
+      </div>
+
+      <div class="result-date" id="resultDate">
+        Assessment Result
+      </div>
+
+    </div>
+
+
+    <!-- SCORE -->
+    <div class="score-card">
+
+      <div class="score-left">
+
+        <h2>Overall Assessment Score</h2>
+
+        <div class="score-number">
+          <span id="score">0</span><span>%</span>
+        </div>
+
+        <div class="performance" id="performance">
+          Calculating your performance...
+        </div>
+
+      </div>
+
+      <div class="score-circle">
+        <span id="circleScore">0%</span>
+      </div>
+
+    </div>
+
+
+    <!-- STATS -->
+    <div class="stats">
+
+      <div class="stat-card">
+        <div class="stat-title">
+          Correct Answers
+        </div>
+
+        <div class="stat-number correct" id="correct">
+          0
+        </div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="stat-title">
+          Incorrect Answers
+        </div>
+
+        <div class="stat-number incorrect" id="incorrect">
+          0
+        </div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="stat-title">
+          Unanswered
+        </div>
+
+        <div class="stat-number unanswered" id="unanswered">
+          0
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- MONITORING -->
+    <div class="monitor-card">
+
+      <div class="monitor-title">
+        Assessment Monitoring
+      </div>
+
+      <div class="monitor-row">
+        <span class="monitor-label">
+          Assessment Questions
+        </span>
+
+        <strong id="totalQuestions">
+          20
+        </strong>
+      </div>
+
+
+      <div class="monitor-row">
+        <span class="monitor-label">
+          Questions Answered
+        </span>
+
+        <strong id="answeredQuestions">
+          0
+        </strong>
+      </div>
+
+
+      <div class="monitor-row">
+        <span class="monitor-label">
+          Monitoring Violations
+        </span>
+
+        <strong id="violations" class="safe">
+          0
+        </strong>
+      </div>
+
+
+      <div class="monitor-row">
+        <span class="monitor-label">
+          Monitoring Status
+        </span>
+
+        <strong id="monitorStatus" class="safe">
+          ✓ Normal
+        </strong>
+      </div>
+
+    </div>
+
+
+    <!-- ACTION -->
+    <div class="action-area">
+
+      <button class="profile-btn" onclick="goToProfile()">
+        View Candidate Profile →
+      </button>
+
+    </div>
+
+  </main>
+
+
+  <script>
+
+    // ================================
+    // READ ASSESSMENT DATA
+    // ================================
+
+    var candidateName =
+      localStorage.getItem("candidateName") || "Candidate";
+
+    var candidateRole =
+      localStorage.getItem("candidateRole") || "Target Role";
+
+    var score =
+      Number(localStorage.getItem("assessmentScore")) || 0;
+
+    var correct =
+      Number(localStorage.getItem("correctAnswers")) || 0;
+
+    var incorrect =
+      Number(localStorage.getItem("incorrectAnswers")) || 0;
+
+    var unanswered =
+      Number(localStorage.getItem("unansweredQuestions")) || 0;
+
+    var answered =
+      Number(localStorage.getItem("answeredQuestions")) || 0;
+
+    var total =
+      Number(localStorage.getItem("totalQuestions")) || 20;
+
+    var violations =
+      Number(localStorage.getItem("assessmentViolations")) || 0;
+
+
+    // ================================
+    // DISPLAY CANDIDATE
+    // ================================
+
+    document.getElementById("candidateName").textContent =
+      candidateName;
+
+    document.getElementById("candidateRole").textContent =
+      candidateRole;
+
+
+    // ================================
+    // DISPLAY SCORE
+    // ================================
+
+    document.getElementById("score").textContent =
+      score;
+
+    document.getElementById("circleScore").textContent =
+      score + "%";
+
+
+    // ================================
+    // DISPLAY STATS
+    // ================================
+
+    document.getElementById("correct").textContent =
+      correct;
+
+    document.getElementById("incorrect").textContent =
+      incorrect;
+
+    document.getElementById("unanswered").textContent =
+      unanswered;
+
+    document.getElementById("answeredQuestions").textContent =
+      answered;
+
+    document.getElementById("totalQuestions").textContent =
+      total;
+
+    document.getElementById("violations").textContent =
+      violations;
+
+
+    // ================================
+    // PERFORMANCE MESSAGE
+    // ================================
+
+    var performanceText = "";
+
+    if (score >= 85) {
+
+      performanceText =
+        "Excellent performance. Your competency level is very strong.";
+
+    } else if (score >= 70) {
+
+      performanceText =
+        "Good performance. You demonstrate strong competency.";
+
+    } else if (score >= 50) {
+
+      performanceText =
+        "Average performance. There is room for further improvement.";
+
+    } else {
+
+      performanceText =
+        "Your current competency needs improvement. Keep learning and practicing.";
+
+    }
+
+    document.getElementById("performance").textContent =
+      performanceText;
+
+
+    // ================================
+    // MONITORING STATUS
+    // ================================
+
+    var monitorStatus =
+      document.getElementById("monitorStatus");
+
+    var violationElement =
+      document.getElementById("violations");
+
+
+    if (violations === 0) {
+
+      monitorStatus.textContent =
+        "✓ Normal";
+
+      monitorStatus.className =
+        "safe";
+
+      violationElement.className =
+        "safe";
+
+    } else {
+
+      monitorStatus.textContent =
+        "⚠️ " + violations + " violation(s)";
+
+      monitorStatus.className =
+        "warning";
+
+      violationElement.className =
+        "warning";
+    }
+
+
+    // ================================
+    // DATE
+    // ================================
+
+    var now = new Date();
+
+    var dateText =
+      now.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+
+    document.getElementById("resultDate").textContent =
+      "Completed • " + dateText;
+
+
+    // ================================
+    // PROFILE BUTTON
+    // ================================
+
+    function goToProfile() {
+
+      window.location.href = "profile.html";
+
+    }
+
+  </script>
+
+</body>
+</html>
