@@ -751,6 +751,7 @@ var selectedAnswers = [];
 var lockedAnswers = [];
 
 var assessmentStarted = false;
+var startRequested = false;
 
 var assessmentFinished = false;
 
@@ -767,6 +768,13 @@ var cameraStream = null;
 var detectionModel = null;
 
 var detectionRunning = false;
+
+/* Camera visibility / quality monitoring */
+var noCandidateSince = null;
+var multipleCandidateSince = null;
+var cameraQualityBadSince = null;
+var cameraCheckCanvas = null;
+var lastCameraVisibilityWarning = 0;
 
 
 /* =========================================
@@ -895,6 +903,10 @@ async function loadQuestions(){
 
     showQuestion();
 
+    if(startRequested){
+      beginExamSession();
+    }
+
 
   }catch(error){
 
@@ -947,13 +959,7 @@ async function startAssessment(){
     "startPopup"
   ).style.display = "none";
 
-
-  assessmentStarted = true;
-
-  document.body.classList.add(
-    "exam-active"
-  );
-
+  startRequested = true;
 
   try{
 
@@ -973,11 +979,38 @@ async function startAssessment(){
 
   }
 
+  noCandidateSince = null;
+  multipleCandidateSince = null;
+  cameraQualityBadSince = null;
+  lastCameraVisibilityWarning = 0;
+
+  /*
+    IMPORTANT:
+    The exam timer and monitoring must NOT start while
+    AI questions are still loading. They start only after
+    all 20 questions are displayed.
+  */
+  if(questions && questions.length === 20){
+    beginExamSession();
+  }
+
+}
+
+
+function beginExamSession(){
+
+  if(assessmentStarted || assessmentFinished){
+    return;
+  }
+
+  assessmentStarted = true;
+
+  document.body.classList.add(
+    "exam-active"
+  );
 
   startTimer();
-
   startCamera();
-
   startObjectDetection();
 
 }
@@ -1523,7 +1556,7 @@ async function startCamera(){
 
 
 /* =========================================
-   AI OBJECT DETECTION
+   AI OBJECT DETECTION + CAMERA MONITORING
 ========================================= */
 
 async function startObjectDetection(){
@@ -1551,6 +1584,18 @@ async function startObjectDetection(){
     detectionRunning = true;
 
 
+    /*
+      Small hidden canvas used to check
+      whether the camera image is clear.
+    */
+
+    cameraCheckCanvas =
+      document.createElement("canvas");
+
+    cameraCheckCanvas.width = 160;
+    cameraCheckCanvas.height = 120;
+
+
     detectObjects();
 
 
@@ -1560,6 +1605,348 @@ async function startObjectDetection(){
       "AI model error:",
       error
     );
+
+  }
+
+}
+
+
+/*
+  Checks camera image sharpness.
+
+  A very low edge difference can indicate
+  that the camera is covered or heavily blurred.
+*/
+
+function getCameraSharpness(video){
+
+  if(!cameraCheckCanvas){
+
+    return null;
+
+  }
+
+
+  var canvas =
+    cameraCheckCanvas;
+
+  var ctx =
+    canvas.getContext(
+      "2d",
+      {
+        willReadFrequently:true
+      }
+    );
+
+
+  try{
+
+    ctx.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+    var imageData =
+      ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+
+    var data =
+      imageData.data;
+
+    var width =
+      canvas.width;
+
+    var height =
+      canvas.height;
+
+
+    var gray =
+      new Float32Array(
+        width * height
+      );
+
+
+    /*
+      Convert frame to grayscale.
+    */
+
+    for(
+      var i = 0,
+      p = 0;
+      i < data.length;
+      i += 4,
+      p++
+    ){
+
+      gray[p] =
+        (
+          0.299 * data[i] +
+          0.587 * data[i + 1] +
+          0.114 * data[i + 2]
+        );
+
+    }
+
+
+    /*
+      Measure local image edges.
+    */
+
+    var totalDifference = 0;
+    var count = 0;
+
+
+    for(
+      var y = 1;
+      y < height - 1;
+      y++
+    ){
+
+      for(
+        var x = 1;
+        x < width - 1;
+        x++
+      ){
+
+        var index =
+          y * width + x;
+
+        var center =
+          gray[index];
+
+        totalDifference +=
+          Math.abs(
+            center -
+            gray[index - 1]
+          ) +
+
+          Math.abs(
+            center -
+            gray[index + 1]
+          ) +
+
+          Math.abs(
+            center -
+            gray[index - width]
+          ) +
+
+          Math.abs(
+            center -
+            gray[index + width]
+          );
+
+        count += 4;
+
+      }
+
+    }
+
+
+    if(!count){
+
+      return null;
+
+    }
+
+
+    return totalDifference / count;
+
+
+  }catch(error){
+
+    console.log(
+      "Camera quality check error:",
+      error
+    );
+
+
+    return null;
+
+  }
+
+}
+
+
+/*
+  Candidate visibility monitoring:
+
+  - Exactly one person should be visible.
+  - No person for 3 seconds = warning.
+  - More than one person for 3 seconds = warning.
+  - Blurred/covered camera for 3 seconds = warning.
+
+  Existing mobile/laptop/keyboard/mouse
+  detection remains active below.
+*/
+
+function checkCameraMonitoring(
+  predictions,
+  video
+){
+
+  if(
+    !assessmentStarted ||
+    assessmentFinished
+  ){
+
+    return;
+
+  }
+
+
+  var now =
+    Date.now();
+
+
+  /* =====================================
+     CANDIDATE / PERSON CHECK
+  ===================================== */
+
+  var persons =
+    predictions.filter(
+      function(prediction){
+
+        return (
+          prediction.class === "person" &&
+          prediction.score >= 0.55
+        );
+
+      }
+    );
+
+
+  /*
+    No candidate visible.
+  */
+
+  if(persons.length === 0){
+
+    if(
+      noCandidateSince === null
+    ){
+
+      noCandidateSince =
+        now;
+
+    }
+
+
+    if(
+      now - noCandidateSince >= 3000
+    ){
+
+      registerViolation(
+        "Candidate is not clearly visible in the camera."
+      );
+
+      noCandidateSince =
+        null;
+
+    }
+
+  }else{
+
+    noCandidateSince =
+      null;
+
+  }
+
+
+  /*
+    More than one person visible.
+  */
+
+  if(persons.length > 1){
+
+    if(
+      multipleCandidateSince === null
+    ){
+
+      multipleCandidateSince =
+        now;
+
+    }
+
+
+    if(
+      now - multipleCandidateSince >= 3000
+    ){
+
+      registerViolation(
+        "More than one person is visible in the camera."
+      );
+
+      multipleCandidateSince =
+        null;
+
+    }
+
+  }else{
+
+    multipleCandidateSince =
+      null;
+
+  }
+
+
+  /* =====================================
+     CAMERA BLUR / OBSTRUCTION CHECK
+  ===================================== */
+
+  var sharpness =
+    getCameraSharpness(video);
+
+
+  /*
+    Low sharpness for 3 continuous seconds
+    means the camera may be blurred/covered.
+
+    The existing registerViolation()
+    function already prevents repeated
+    violations within 10 seconds.
+  */
+
+  if(
+    sharpness !== null &&
+    sharpness < 7
+  ){
+
+    if(
+      cameraQualityBadSince === null
+    ){
+
+      cameraQualityBadSince =
+        now;
+
+    }
+
+
+    if(
+      now - cameraQualityBadSince >= 3000
+    ){
+
+      registerViolation(
+        "Camera view is blurred or obstructed. Keep the candidate clearly visible."
+      );
+
+      cameraQualityBadSince =
+        null;
+
+    }
+
+  }else{
+
+    cameraQualityBadSince =
+      null;
 
   }
 
@@ -1597,6 +1984,30 @@ async function detectObjects(){
         );
 
 
+      /*
+        New camera monitoring:
+        candidate visibility + blur check.
+      */
+
+      checkCameraMonitoring(
+        predictions,
+        video
+      );
+
+
+      /*
+        Existing suspicious object detection.
+        Phone detection remains unchanged.
+      */
+
+      var suspiciousObjects = [
+        "cell phone",
+        "laptop",
+        "keyboard",
+        "mouse"
+      ];
+
+
       for(
         var i = 0;
         i < predictions.length;
@@ -1605,19 +2016,6 @@ async function detectObjects(){
 
         var prediction =
           predictions[i];
-
-
-        /*
-          Phone detection is made faster
-          and more sensitive.
-        */
-
-        var suspiciousObjects = [
-          "cell phone",
-          "laptop",
-          "keyboard",
-          "mouse"
-        ];
 
 
         if(
@@ -1652,8 +2050,7 @@ async function detectObjects(){
 
 
   /*
-    Detection interval changed from
-    2500ms to 700ms for faster detection.
+    Detection interval remains 700ms.
   */
 
   setTimeout(
@@ -1984,6 +2381,9 @@ function submitAssessment(reason){
 
   detectionRunning = false;
 
+  noCandidateSince = null;
+  multipleCandidateSince = null;
+  cameraQualityBadSince = null;
 
   if(cameraStream){
 
